@@ -4,7 +4,8 @@ import android.content.Context;
 import androidx.room.Room;
 import androidx.test.core.app.ApplicationProvider;
 import com.busykoala.models.User;
-import com.busykoala.models.UserDatabase;
+import com.busykoala.models.AppDatabase;
+import com.busykoala.models.UserDao;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,25 +18,25 @@ import static org.junit.Assert.assertEquals;
 
 
 public class UserDatabaseTest {
-    UserDatabase userDatabase;
+    AppDatabase appDB;
 
     @Before
     public void initDb() throws Exception {
         Context context = ApplicationProvider.getApplicationContext();
-        userDatabase = Room.inMemoryDatabaseBuilder(context, UserDatabase.class).build();
+        appDB = Room.inMemoryDatabaseBuilder(context, AppDatabase.class).build();
     }
 
     @After
     public void closeDb() throws Exception {
-        userDatabase.close();
+        appDB.close();
     }
 
     @Test
     public void insertAndGetUser() {
         User elisabeth = new User("Elisabeth", "Meier");
-        userDatabase.getUserDao().insertAll(elisabeth);
+        appDB.getUserDao().insertAll(elisabeth);
 
-        List<User> users = userDatabase.getUserDao().getAll();
+        List<User> users = appDB.getUserDao().getAll();
         assertThat(users.size(), is(1));
 
         User dbUser = users.get(0);
@@ -45,32 +46,32 @@ public class UserDatabaseTest {
     @Test
     public void insertAndUpdateUser() {
         User elisabeth = new User("Elisabeth", "Meier");
-        userDatabase.getUserDao().insertAll(elisabeth);
+        appDB.getUserDao().insertAll(elisabeth);
 
-        User dbUser = userDatabase.getUserDao().getAll().get(0);
+        User dbUser = appDB.getUserDao().getAll().get(0);
         assertEquals("Elisabeth", dbUser.firstName);
 
         // update user info
         dbUser.setFirstName("Albert");
         dbUser.setLastName("Einstein");
-        userDatabase.getUserDao().updateUsers(dbUser);
+        appDB.getUserDao().updateUsers(dbUser);
 
         // assert that one value and correct info
-        User albert = userDatabase.getUserDao().getAll().get(0);
+        User albert = appDB.getUserDao().getAll().get(0);
         assertEquals("Albert", albert.firstName);
     }
 
     @Test
     public void insertAndDeleteUser() {
         User elisabeth = new User("Elisabeth", "Meier");
-        userDatabase.getUserDao().insertAll(elisabeth);
+        appDB.getUserDao().insertAll(elisabeth);
 
-        List<User> users = userDatabase.getUserDao().getAll();
+        List<User> users = appDB.getUserDao().getAll();
         assertThat(users.size(), is(1));
 
         User dbUser = users.get(0);
-        userDatabase.getUserDao().delete(dbUser);
-        List<User> usersAfterDeletion = userDatabase.getUserDao().getAll();
+        appDB.getUserDao().delete(dbUser);
+        List<User> usersAfterDeletion = appDB.getUserDao().getAll();
         assertThat(usersAfterDeletion.size(), is(0));
     }
 }
